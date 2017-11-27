@@ -1,0 +1,27 @@
+{
+  "name": "mysongremover",
+  "version": "1.0.0",
+  "description": "proyecto para la clase",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lilinarvaez6/MySongRemover.git"
+  },
+  "author": "Liliana",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Lilinarvaez6/MySongRemover/issues"
+  },
+  "homepage": "https://github.com/Lilinarvaez6/MySongRemover#readme",
+  "devDependencies": {
+    "install": "^0.10.2"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.3",
+    "express": "^4.16.2",
+    "request": "^2.83.0"
+  }
+}

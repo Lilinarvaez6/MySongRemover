@@ -1,0 +1,59 @@
+<!doctype html>
+<html ng-app="spotify">
+<head>
+  <title>si se puede</title>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular-route.js"></script>
+  <script src="controlador/control.js"></script>
+ 
+</head>
+
+<body>
+
+  <div class="container">
+
+  <!--  iniciar sesión  -->
+    <div id="login" ng-controller="iniciando"  ng-show="inicio">
+        <h1>bienvenido</h1>
+        <a href="/login" class="btn btn-primary"  ng-click="r()"> Inicia sesión con Spotify</a>
+    </div>
+  <div id="loggedin"  >
+ <!--    -->
+<!--  images.0.url  -->
+      <!-- datos personales    -->
+  <div class="container" ng-controller="perfil">
+      <h3>Datos personales</h3>
+      <h4>user </h4>         <h6>{{data.id}} </h6>
+      <h4>Display name </h4> <h6>{{data.display_name}} </h6>
+      <h4>Email </h4>        <h6>{{data.email}} </h6>
+      <h4>Country </h4>      <h6>{{data.country}} </h6>
+      <h4>foto </h4>         <h6>{{data.id}} </h6>
+     
+  </div>
+
+      <!--  nombre de las playlist  -->
+  <div class="container" ng-controller="playlist">
+      <h3>playlist </h3>
+      <h6 ng-repeat= "list in lista"> 
+      <a href="#" ng-controller="tracks" ng-click='track(list.href)'>{{list.name}}</a> 
+      </h6>
+  </div>
+
+      <!-- nombre de las canciones  -->
+  <div class="container" ng-controller="tracks">
+      <h3 >canciones </h3>
+      <h6 ng-repeat= "lt in listatrack">
+      <ul>
+        <li>{{lt.track.name}}</li>
+      </ul>
+      </h6>
+  </div>
+
+  </div>
+  </div>
+
+  
+</body>
+</html>
+
