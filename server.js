@@ -4,6 +4,24 @@ var request = require('request');
 var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
 
+
+// // conexion con mongoose
+// var mongoose = require('mongoose');
+// mongoose.connect('mongodb://localhost/mysongs',{ useMongoClient: true });
+
+// var db = mongoose.connection;
+// db.on('error', console.error.bind(console, 'connection error:'));
+// db.once('open', function() {
+//   console.log("we're connected!");
+// });
+
+
+// // conexion con base de datos pg
+//var pg = require("pg");
+//var connectionString = "postgres://postgres:postgres@localhost:5432/mysongs";
+
+
+
 //lo de la aplicacion de Spotify
 var client_id = '956f9a50e95e4b888f59e45e27f6615e'; 
 var client_secret = '02d287a741f440d189d4a99a5064c379'; 
@@ -93,8 +111,23 @@ app.get('/callback', function(req, res) {
 
         //
         request.get(options, function(error, response, body) {
-          //mostrar en la consola de node
-          console.log(body);
+          // conexion base de datos posgrest
+          // var client = new pg.Client(connectionString);
+          // client.connect();
+          // var text = 'INSERT INTO usuario(nombre,apellido, nick, email) VALUES($1, $2, $3, $4)';
+          // var values = [body.id, body.id,body.id,body.email];
+
+          // client.query(text, values, (err, res) => {
+          //   if (err) {
+          //     console.log(err.stack)
+          //   } else {
+          //     console.log(res.rows[0])
+          //     // { name: 'brianc', email: 'brian.m.carlson@gmail.com' }
+          //   }
+          // })
+          // client.end();
+           console.log(body);
+          
         });
 
         
@@ -105,15 +138,41 @@ app.get('/callback', function(req, res) {
             access_token: access_token,
             refresh_token: refresh_token
           }));
-      } else {
-        res.redirect('/#' +
-          querystring.stringify({
-            error: 'invalid_token'
-          }));
-      }
+          } else {
+            res.redirect('/#' +
+              querystring.stringify({
+                error: 'invalid_token'
+              }));
+          }
     });
+
   }
 });
+
+// callback metodo para post 
+
+
+
+//base de datos
+
+// app.get('/data', function (req, res) {
+//   var client = new pg.Client(connectionString);
+//   client.connect();
+//   client.query('SELECT * FROM usuario', (err, res) => {
+//   console.log(err, res)
+//   client.end()
+//   })
+// });
+// callback metodo para post 
+// client.query(text, values, (err, res) => {
+//   if (err) {
+//     console.log(err.stack)
+//   } else {
+//     console.log(res.rows[0])
+//     // { name: 'brianc', email: 'brian.m.carlson@gmail.com' }
+//   }
+//})
+//-----------------------------------------------
 //ya no uso pero es lo de refresh 
 app.get('/refresh_token', function(req, res) {
 

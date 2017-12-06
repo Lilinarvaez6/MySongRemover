@@ -20,8 +20,11 @@
     "install": "^0.10.2"
   },
   "dependencies": {
+    "body-parser": "^1.18.2",
     "cookie-parser": "^1.4.3",
     "express": "^4.16.2",
+    "mongoose": "^4.13.6",
+    "pg": "^7.4.0",
     "request": "^2.83.0"
   }
 }
