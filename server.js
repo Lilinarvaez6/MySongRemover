@@ -5,16 +5,25 @@ var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
 
 
-// // conexion con mongoose
-// var mongoose = require('mongoose');
-// mongoose.connect('mongodb://localhost/mysongs',{ useMongoClient: true });
 
-// var db = mongoose.connection;
-// db.on('error', console.error.bind(console, 'connection error:'));
-// db.once('open', function() {
-//   console.log("we're connected!");
-// });
+/*// conexion con mongoose  y llamada al Schema
+var mongoose = require('mongoose');
+const Reporte = require('./models/reporte');
+mongoose.connect('mongodb://localhost/mysongs', (err, res) =>{
+  if (err) throw err
+    console.log('conexion a la base de datos establecida')
+});
+*/
 
+
+
+
+/*var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function() {
+  console.log("we're connected!");
+});
+*/
 
 // // conexion con base de datos pg
 //var pg = require("pg");
@@ -41,6 +50,9 @@ var generateRandomString = function(length) {
 var stateKey = 'spotify_auth_state';
 
 var app = express();
+
+
+
 
 //direccion del contenido
 app.use(express.static(__dirname + '/public'))
@@ -172,6 +184,23 @@ app.get('/callback', function(req, res) {
 //     // { name: 'brianc', email: 'brian.m.carlson@gmail.com' }
 //   }
 //})
+
+/*app.get('/data', function (req, res) {
+  console.log('POST /data')
+  console.log(req.body)
+  // se crea el objeto y se asignan los atributos del body
+  let reporte = new Reporte()
+  reporte.idLista = "1"
+  reporte.idCancion = "1"
+
+  // para guardar en la base de datos 
+  reporte.save((err, reporteStored) =>{
+    if (err) res.status(500).send({message: 'error'})
+
+    res.status(200).send({reporte : reporteStored})
+  })
+});*/
+
 //-----------------------------------------------
 //ya no uso pero es lo de refresh 
 app.get('/refresh_token', function(req, res) {
