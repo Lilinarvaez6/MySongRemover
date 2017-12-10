@@ -76,6 +76,7 @@ function getHashParams() {
                             'Authorization': 'Bearer ' + access_token
                    }
             	}).then(function(response) {  
+                 
                 		$scope.lista = response.data.items;
                   });
 			}, 1000);
