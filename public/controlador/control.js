@@ -24,8 +24,21 @@ function getHashParams() {
 
              var app = angular.module("spotify", []);
 
-        // para compartir información general de las canciones de la playlist seleccionada
+        // para compartir información general de las canciones  actualizadas de la playlist seleccionada
         app.factory("updateCanciones", function() {
+            var songs= {};
+            return {
+              set: function(value){
+                      songs = value;
+              },
+              get: function(){
+                return songs;
+              }
+            };
+        });
+
+        // para compartir información general de las canciones de la playlist seleccionada
+        app.factory("completaCanciones", function() {
             var songs= {};
             return {
               set: function(value){
@@ -65,6 +78,7 @@ function getHashParams() {
             };
         });
 
+
           // controlador para dar inicio y no mostrar el boton de bienvenida //aun no funciona
           app.controller("iniciando", function($scope) {
            $scope.inicio = false;
@@ -96,6 +110,7 @@ function getHashParams() {
 
         // controlador para las listas y con un tiempo de espera para poder funcionar bien 
         app.controller("playlist", function($scope, $http, datos,  $timeout) {
+
             $timeout(function(){
 				      $http({
                     method: "GET",
@@ -104,16 +119,21 @@ function getHashParams() {
                             'Authorization': 'Bearer ' + access_token
                    }
             	}).then(function(response) {  
+                 
                 		$scope.lista = response.data.items;
                   });
 			}, 1000);
 			});
 
-        //controlador para eliminar canciones repetidas
+        //controlador para eliminar todas las canciones repetidas
         app.controller("repetidas", function($scope, $http, playl, updateCanciones) {
           $scope.cancionesrepetidas = function () {
             //paraData tiene la construcción de uris
-            var paraData = cancionesSinRepetir(updateCanciones.get());
+            var paraData = cancionesSinRepetirTodas(updateCanciones.get());
+
+            console.log(paraData);
+
+
                   $http({
                     method: "PUT",
                   
@@ -127,7 +147,9 @@ function getHashParams() {
                    },
                    data : paraData
 
-              }).then(function(response) {  
+              }).then(function(response) { 
+
+                //Aqui mandar un mensaje que fue eliminada las canciones 
                     console.log('hecho ');
                                   
           });
@@ -135,8 +157,76 @@ function getHashParams() {
       ;
  });
 
+    
+
+        //Controlador para eliminar la cancion selecionada 
+        app.controller("eliminarUno", function($scope, $http, playl, completaCanciones) {
+          $scope.eliminaUno = function (numero) {
+
+              
+              var canciones = completaCanciones.get();
+              var nuevo =  cancionesBuscar(canciones, numero);
+
+                $http({
+                    method: "PUT",
+                  
+                    url: playl.get()+'/tracks',
+    
+                    headers: {
+                            
+                            'Authorization': 'Bearer ' + access_token,
+                            'Content-Type': 'application/json'
+                            
+                   },
+                   data : nuevo
+
+              }).then(function(response) { 
+
+                  
+                   //Aqui mandar un mensaje que fue eliminada la cancion seleccionada 
+                                  
+          });
+
+      };
+ });
+
+
+          // busca las posiciones de las canciones para despues saber cual eliminar 
+          // parte del controlador buscar
+        function posicionUrisRepetidas(arrayUriSin){
+
+
+            var pos =[];
+
+            for (var i = 0; i < arrayUriSin.length; i++) {
+              if(arrayUriSin[i] != null){
+                pos [pos.length]=  i ;
+              }
+
+            }
+         
+            console.log("posiciones ", pos);
+
+            return pos; 
+
+        }
+
+
+        // Controlador para buscar todas las canciones repetidas de la lista
+         app.controller("buscar", function($scope, $rootScope,  updateCanciones) {
+
+    
+          $scope.buscarrepetidas = function () {
+          var paraDatass         = cancionesSinRepetir(updateCanciones.get());
+          var pos                =  posicionUrisRepetidas(paraDatass);
+          $rootScope.re          = pos; 
+         };
+         });
+
+
+
         // controlador para las canciones 
-        app.controller("tracks", function($scope, $http,$rootScope, playl, updateCanciones) { 
+        app.controller("tracks", function($scope, $http,$rootScope, playl, updateCanciones, completaCanciones) { 
             $scope.track = function ( path ) {
               playl.set(path);
 		          $http({
@@ -147,13 +237,15 @@ function getHashParams() {
                     }
               }).then(function(response2) {
                     
-                      $rootScope.listatrack = response2.data.items;
-                      updateCanciones.set(response2.data);
-                   
+                       
+                          $rootScope.listatrack = response2.data.items;
+                          updateCanciones.set(response2.data);
+                          completaCanciones.set(response2.data);
+
                     }) 
             };
         });
-                    //verifica el uri, es parte de la funcion cancionesSinRepetir
+                    //verifica el uri, es parte de la funcion cancionesSinRepetir, cancionesSinRepetirTodas
                   function eliminandoDupl(elemento, array_sin) {
                 for (j = 0; j < array_sin.length; j++) {
                     if (array_sin[j] == elemento) {
@@ -164,7 +256,8 @@ function getHashParams() {
                 }
 
 
-                //llena el array de uris sin formato de PUT, es parte de la funcion cancionesSinRepetir
+                //llena el array de uris sin formato de PUT
+                // es parte de la funcion cancionesSinRepetir, cancionesBuscar y  cancionesSinRepetirTodas
             function llenarArrayUris(data){
               var tamaño = data.items.length;
                var arrayuri = [];
@@ -176,7 +269,8 @@ function getHashParams() {
             return arrayuri;
 
             }
-              //llena la variable con uris en el formato PUT, es parte de la funcion cancionesSinRepetir
+              //llena la variable con uris en el formato PUT
+              //es parte de la funcion cancionesBuscar y cancionesSinRepetirTodas
             function construyendoUri(array_sin){
                var uris = '{"uris":[';
 
@@ -193,31 +287,82 @@ function getHashParams() {
 
                      return uris;
 
+
+
+                     console.log("contruyendo ", uris); 
+
             }
+
+          
 
 
             //es la funcion llamada desde el controlador repetidas para enviar las canciones a actualizar
-            //sin canciones repetidas 
+            //sin canciones repetidas  
           function cancionesSinRepetir(data){
            var arrayuri = llenarArrayUris(data);
            var tamaño = arrayuri.length;
            var array_sin = [];
+           var array_rep = [];
+
+            for (i = 0; i < tamaño; i++) {
+                if (eliminandoDupl(arrayuri[i], array_sin) === false) {
+                    array_sin[array_sin.length] = arrayuri[i]
+
+                }else{
+                    array_rep[i] = arrayuri[i];
+                }
+
+            }
+            return array_rep;
+
+            console.log(array_rep);
+
+          }
+
+          //es la funcion llamada desde el controlador repetidas para enviar las canciones a actualizar
+          function cancionesSinRepetirTodas(data){
+           var arrayuri = llenarArrayUris(data);
+           var tamaño = arrayuri.length;
+           var array_sin = [];
+           var array_rep = [];
 
             for (i = 0; i < tamaño; i++) {
                 if (eliminandoDupl(arrayuri[i], array_sin) === false) {
                     array_sin[array_sin.length] = arrayuri[i]
 
                 }
-            }
-            var uris = construyendoUri(array_sin);
 
-        console.log(uris);
-           
-            return uris;
+            }
+
+            var  construUri = construyendoUri(array_sin);
+            return construUri;
+
+            
 
           }
 
 
+          //es la funcion llamada desde el controlador eliminarUno para enviar las canciones a actualizar
+          //dependiendo de las canciones seleccionadas 
+           function cancionesBuscar(data, elemento){
+           var arrayuri = llenarArrayUris(data);
+           var tamaño = arrayuri.length;
+           var array_sin = [];
+           
+
+            for (i = 0; i < tamaño; i++) {
+                if (i != elemento) {
+                    array_sin[array_sin.length] = arrayuri[i]
+
+                }
+
+            }
+
+          
+            var uris = construyendoUri(array_sin);
+            return uris;
+
+          }
 
 
         }// final de if
