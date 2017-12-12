@@ -22,7 +22,28 @@ function getHashParams() {
         } else {
         if (access_token) {
 
-             var app = angular.module("spotify", []);
+             var app = angular.module("spotify", ['toastr']);
+
+
+            app.controller('TabController', function($scope) {
+                  $scope.tab = 1;
+
+                  $scope.setTab = function(newTab){
+                    $scope.tab = newTab;
+                  };
+
+                  $scope.isSet = function(tabNum){
+                    return $scope.tab === tabNum;
+                  };
+              });
+
+             /*$("#alert-target").click(function () {
+                toastr["info"]("I was launched via jQuery!")
+              });*/
+
+/*              app.controller('foo', function($scope, toastr) {
+                toastr.success('Hello world!', 'Toastr fun!');
+              });*/
 
         // para compartir información general de las canciones  actualizadas de la playlist seleccionada
         app.factory("updateCanciones", function() {
@@ -61,6 +82,19 @@ function getHashParams() {
               },
               get: function(){
                 return id;
+              }
+            };
+        });
+
+
+        app.factory("tamano", function() {
+            var tamano = 0;
+            return {
+              set: function(value){
+                      tamano = value;
+              },
+              get: function(){
+                return tamano;
               }
             };
         });
@@ -121,17 +155,21 @@ function getHashParams() {
             	}).then(function(response) {  
                  
                 		$scope.lista = response.data.items;
+
+                    console.log("playlist ", response.data.items);
                   });
-			}, 1000);
+			}, 2000);
 			});
 
         //controlador para eliminar todas las canciones repetidas
-        app.controller("repetidas", function($scope, $http, playl, updateCanciones) {
+        app.controller("repetidas", function($scope, $http, playl, updateCanciones,  toastr, completaCanciones, tamano) {
           $scope.cancionesrepetidas = function () {
             //paraData tiene la construcción de uris
             var paraData = cancionesSinRepetirTodas(updateCanciones.get());
+            var complet = completaCanciones.get();
+            console.log("es vacio ", paraData);
 
-            console.log(paraData);
+            console.log("completa ",complet);
 
 
                   $http({
@@ -148,9 +186,15 @@ function getHashParams() {
                    data : paraData
 
               }).then(function(response) { 
-
+                   
+                var mensaje = tamano.get();
+                console.log("tamaño de las lista de canciones ",mensaje);
+                if(mensaje != 0){
                 //Aqui mandar un mensaje que fue eliminada las canciones 
-                    console.log('hecho ');
+                toastr.success('Se eliminaron las canciones exitosamente', 'Notificacion');
+              }else{
+                toastr.error('No se encuentran canciones repetidas', 'Notificacion');
+              }
                                   
           });
       }
@@ -166,6 +210,9 @@ function getHashParams() {
               
               var canciones = completaCanciones.get();
               var nuevo =  cancionesBuscar(canciones, numero);
+                    console.log("eliminarUno  canciones", canciones);
+                    console.log("eliminarUno nuevo", nuevo);
+
 
                 $http({
                     method: "PUT",
@@ -182,8 +229,9 @@ function getHashParams() {
 
               }).then(function(response) { 
 
-                  
-                   //Aqui mandar un mensaje que fue eliminada la cancion seleccionada 
+                 // toastr.success('Cancion eliminada exitosamente', 'Notificacion');
+                                  
+    //Aqui mandar un mensaje que fue eliminada la cancion seleccionada 
                                   
           });
 
@@ -205,7 +253,7 @@ function getHashParams() {
 
             }
          
-            console.log("posiciones ", pos);
+            console.log("posicionUrisRepetidas posiciones ", pos);
 
             return pos; 
 
@@ -213,13 +261,23 @@ function getHashParams() {
 
 
         // Controlador para buscar todas las canciones repetidas de la lista
-         app.controller("buscar", function($scope, $rootScope,  updateCanciones) {
+         app.controller("buscar", function($scope, $rootScope,  updateCanciones, tamano) {
 
     
           $scope.buscarrepetidas = function () {
           var paraDatass         = cancionesSinRepetir(updateCanciones.get());
           var pos                =  posicionUrisRepetidas(paraDatass);
           $rootScope.re          = pos; 
+
+          var tamanos = paraDatass.length;
+
+          tamano.set(tamanos);
+
+            console.log("buscar paraDatass ", paraDatass);
+            console.log("buscar pos ", pos);
+
+
+
          };
          });
 
@@ -229,6 +287,9 @@ function getHashParams() {
         app.controller("tracks", function($scope, $http,$rootScope, playl, updateCanciones, completaCanciones) { 
             $scope.track = function ( path ) {
               playl.set(path);
+
+            console.log("tracks path ", path);
+
 		          $http({
                     method: "GET",
                     url:path+'/tracks' ,
@@ -237,6 +298,7 @@ function getHashParams() {
                     }
               }).then(function(response2) {
                     
+                        console.log("tracks response2 ", response2);
                        
                           $rootScope.listatrack = response2.data.items;
                           updateCanciones.set(response2.data);
@@ -265,7 +327,7 @@ function getHashParams() {
               var j = data.items[i].track.uri;
               arrayuri.push(j);
             }
-
+            console.log("llenarArrayUris ", arrayuri);
             return arrayuri;
 
             }
@@ -285,11 +347,13 @@ function getHashParams() {
 
                      uris +=']}';
 
+                     console.log("contruyendo ", uris);
+
                      return uris;
 
 
 
-                     console.log("contruyendo ", uris); 
+                      
 
             }
 
@@ -313,9 +377,10 @@ function getHashParams() {
                 }
 
             }
+            console.log("cancionesSinRepetir array_rep ",array_rep);
             return array_rep;
 
-            console.log(array_rep);
+            
 
           }
 
@@ -334,8 +399,14 @@ function getHashParams() {
 
             }
 
+            console.log("cancionesSinRepetirTodas ",array_sin);
             var  construUri = construyendoUri(array_sin);
+            console.log("cancionesSinRepetirTodas construUri ",construUri);
+            
+            
+
             return construUri;
+
 
             
 
@@ -358,8 +429,11 @@ function getHashParams() {
 
             }
 
+            
+            console.log("cancionesBuscar array_sin ",array_sin);
           
             var uris = construyendoUri(array_sin);
+            console.log("cancionesBuscar uris ",uris);
             return uris;
 
           }
