@@ -99,6 +99,8 @@ function getHashParams() {
             };
         });
 
+
+
         // para compartir el dato id del usuario
         app.factory("datos", function() {
             var id= 'default';
@@ -113,12 +115,41 @@ function getHashParams() {
         });
 
 
+        // para compartir el dato id del usuario
+        app.factory("reportesDatos", function() {
+            var repor= [];
+            return {
+              set: function(value){
+                      repor[repor.length] = value;
+              },
+              get: function(){
+                return repor;
+              }
+            };
+        });
+
+
+
+        app.factory("nombresCanciones", function() {
+                    var nomb = [];
+                    return {
+                      set: function(value){
+                              nomb[nomb.length] = value;
+                      },
+                      get: function(){
+                        return nomb;
+                      }
+                    };
+                });
+
+       
+
           // controlador para dar inicio y no mostrar el boton de bienvenida //aun no funciona
           app.controller("iniciando", function($scope) {
-           $scope.inicio = false;
-           $scope.c = true;
+          
+          
            
-          $scope.r = function(){
+          $scope.reiniciando = function(){
               $scope.inicio = true;
                
             }
@@ -204,12 +235,16 @@ function getHashParams() {
     
 
         //Controlador para eliminar la cancion selecionada 
-        app.controller("eliminarUno", function($scope, $http, playl, completaCanciones) {
+        app.controller("eliminarUno", function($scope, $http, playl, completaCanciones, reportesDatos, nombresCanciones) {
           $scope.eliminaUno = function (numero) {
 
               
               var canciones = completaCanciones.get();
-              var nuevo =  cancionesBuscar(canciones, numero);
+              var nuevo     =  cancionesBuscar(canciones, numero);
+              var reportes  = cancionesReportes(canciones, numero);
+              var nombres  = cancionesNombres(canciones, numero);
+              reportesDatos.set(reportes);
+              nombresCanciones.set(nombres);
                     console.log("eliminarUno  canciones", canciones);
                     console.log("eliminarUno nuevo", nuevo);
 
@@ -237,6 +272,7 @@ function getHashParams() {
 
       };
  });
+
 
 
           // busca las posiciones de las canciones para despues saber cual eliminar 
@@ -307,9 +343,109 @@ function getHashParams() {
                     }) 
             };
         });
+
+        function urisNueva(data, numero){
+
+          var tamaño = data.length;
+          console.log("tamaño ", tamaño);
+          var uris   = [];
+          var j =0;
+          var nuevo = [];
+           console.log("numero ", numero);
+            for ( i = 0; i < tamaño; i++) {
+                console.log("contar ", i);
+                  
+                if (i == numero) {
+                   var nuevo = data[i];
+
+                   uris[uris.length] = nuevo[0];
+
+                }
+
+                console.log("uris para restaurar ", uris);
+                      }
+                      return uris;
+      }
+
+
+       var actualizarReportes = app.controller("actul" ,function($scope,  nombresCanciones){
+
+            $scope.reporte = nombresCanciones.get();
+                console.log("reportesss ", nombresCanciones.get());
+                $scope.ver = true;
+
+
+        });
+
+
+
+        app.controller("reportes", function($scope,$apply, $http, reportesDatos, nombresCanciones,updateCanciones, reportesDatos, playl){
+
+          $scope.ver= false;
+           // $scope.verReportes = function(){
+
+
+                $scope.reporte = nombresCanciones.get();
+                console.log("reportesss ", nombresCanciones.get());
+                $scope.ver = true;
+                $scope.$apply();
+
+           // }
+
+           $scope.restaura = function(numero){
+                  $route.reload();
+            var eliminadas = reportesDatos.get();
+
+              console.log("elimanodooo ", eliminadas);
+            var urisUnir   = urisNueva(eliminadas, numero);
+            var cancioness = updateCanciones.get();
+            console.log("hhh ", updateCanciones.get());
+            var dataRestaurada = adherirCancion(cancioness,urisUnir);
+            var path = playl.get();
+            
+
+            $http({
+                    method: "PUT",
+                  
+                    url: path+'/tracks',
+    
+                    headers: {
+                            
+                            'Authorization': 'Bearer ' + access_token,
+                            'Content-Type': 'application/json'
+                            
+                   },
+                   data : dataRestaurada
+
+              }).then(function(response) {
+
+          
+                //actualizarReportes();
+
+                 // toastr.success('Cancion eliminada exitosamente', 'Notificacion');
+                                  
+    //Aqui mandar un mensaje que fue eliminada la cancion seleccionada 
+                                  
+          });
+
+
+
+
+
+           }
+
+
+
+          //$scope.reporte = reportesDatos.get();
+          
+
+
+        });
+
+
                     //verifica el uri, es parte de la funcion cancionesSinRepetir, cancionesSinRepetirTodas
                   function eliminandoDupl(elemento, array_sin) {
-                for (j = 0; j < array_sin.length; j++) {
+                for (var j = 0; j < array_sin.length; j++) {
                     if (array_sin[j] == elemento) {
                         return true;
                     }
@@ -336,7 +472,7 @@ function getHashParams() {
             function construyendoUri(array_sin){
                var uris = '{"uris":[';
 
-               for (i = 0; i < array_sin.length; i++) {
+               for (var i = 0; i < array_sin.length; i++) {
              uris +=  '"'+array_sin[i]+'"';
                        if ((array_sin.length-1) == i) {
                         uris +="";
@@ -368,7 +504,7 @@ function getHashParams() {
            var array_sin = [];
            var array_rep = [];
 
-            for (i = 0; i < tamaño; i++) {
+            for (var i = 0; i < tamaño; i++) {
                 if (eliminandoDupl(arrayuri[i], array_sin) === false) {
                     array_sin[array_sin.length] = arrayuri[i]
 
@@ -391,7 +527,7 @@ function getHashParams() {
            var array_sin = [];
            var array_rep = [];
 
-            for (i = 0; i < tamaño; i++) {
+            for (var i = 0; i < tamaño; i++) {
                 if (eliminandoDupl(arrayuri[i], array_sin) === false) {
                     array_sin[array_sin.length] = arrayuri[i]
 
@@ -419,24 +555,89 @@ function getHashParams() {
            var arrayuri = llenarArrayUris(data);
            var tamaño = arrayuri.length;
            var array_sin = [];
+           var paraReportes =[];
            
 
-            for (i = 0; i < tamaño; i++) {
+            for (var i = 0; i < tamaño; i++) {
                 if (i != elemento) {
-                    array_sin[array_sin.length] = arrayuri[i]
+                    array_sin[array_sin.length] = arrayuri[i];
 
                 }
 
             }
+
+
 
             
             console.log("cancionesBuscar array_sin ",array_sin);
           
             var uris = construyendoUri(array_sin);
             console.log("cancionesBuscar uris ",uris);
+
+
+
+
+
             return uris;
 
           }
+
+
+          //para poner las canciones en reportes 
+           function cancionesReportes(data, elemento){
+           var arrayuri = llenarArrayUris(data);
+           var tamaño = arrayuri.length;
+           var paraReportes =[];
+           
+
+            for (var i = 0; i < tamaño; i++) {
+                if (i === elemento) {
+                    paraReportes[paraReportes.length] = arrayuri[i];
+
+                }
+
+            }
+         //   var urisRe = construyendoUri(paraReportes);
+          //  console.log("dataaa  ",data);
+         //   console.log("cancionesReportes paraReportes ",urisRe);
+            return paraReportes;
+
+          }
+
+          function cancionesNombres(data, elemento){
+              var nombres;
+              var tamaño = data.items.length;
+              
+              for (i = 0; i < tamaño; i++) {
+                  if (i === elemento) {
+
+                    nombres = data.items[i].track.name;
+                    
+
+                }
+              }
+              console.log("ayudaaaa ",nombres); 
+            return nombres;
+
+          }
+
+          function adherirCancion(data, elemento){
+
+             var arrayuri = llenarArrayUris(data);
+             arrayuri.push(elemento); 
+
+             var urisRestaurada = construyendoUri(arrayuri);
+
+             console.log("elemento restaurado ", urisRestaurada);
+             return urisRestaurada;
+
+
+          }
+
+
+
+
+          
 
 
         }// final de if
