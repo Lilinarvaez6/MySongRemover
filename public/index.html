@@ -32,34 +32,41 @@
                  <li class="nav-item" ng-class="{ active: isSet(3) }" >
                       <a class="nav-link" href ng-click="setTab(3)">Listas de reproduccion</a>
                   </li>
+                  <li class="nav-item" ng-class="{ active: isSet(4) }" >
+                      <a class="nav-link" href ng-click="setTab(4)">Reportes</a>
+                  </li>
               </ul>
           </div>
       </div>
   </nav>
 
 
-  <div class="container"  >
+  <!--<div class="container"  > -->
 
       <!--  iniciar sesión  -->
-      <div class="row" ng-show="isSet(1)">
+      <div class="row" class="container" ng-show="isSet(1)">
           <div class="col-6 col-md-4"></div>
-          <div class="col-6 col-md-4" id="login" >
+          <div class="col-6 col-md-4" id="login"  ng-controller= "iniciando">
               <br>
               <br>
               <br>
               <br>
-              <h1>¡Bienvenido!</h1>
-              <a  href="/login" class="btn btn-success"   ng-click="r()"> Inicia sesión con Spotify</a>
+             
+              <a  href="/login" class="btn btn-success"   ng-click="reiniciando()"> Inicia sesión con Spotify</a>
+
+              <div ng-show="inicio">
+               <h1 >¡Bienvenido!</h1>
+              </div>
           </div>
           <div class="col-6 col-md-4" ></div>
       </div>
 
 
-      <div id="loggedin"  >
+    <!--  <div id="loggedin"  >-->
         <!--    -->
         <!--  images.0.url  -->
               <!-- datos personales    -->
-            <div class="container" ng-controller="perfil" ng-show="isSet(2)">
+            <div class="container" ng-controller="perfil" ng-show="isSet(2)" >
                 <br>
                 <br>
                 <br>
@@ -163,10 +170,36 @@
           </div>
 
 
+          <div class="container"  ng-show="isSet(4)" ng-controller="reportes">
+                <br>
+                <br>
+                <br>
+                <h3 class="text-center" >Reportes</h3>
+                <br>
+                <h6 ng-repeat= "reportess in reporte  track by $index" ng-init="sectionIndex = $index" >
+                <ul class="list-group" >
+                <div class="row" >
+                    <div class="col-6 col-md-8">
+                      
+                     <li class="list-group-item"  >
+                      {{reportess}}
+                     </li>
+                    </div>
+
+                    <div class="col-6 col-md-2">
+                                 
+                       <button type="button"  class="btn btn-success"  ng-click = 'restaura(sectionIndex)'>Restaurar</button> 
+                                         
+                    </div>
+                </div>
+                </ul>
+                </h6>
+            </div>
 
 
-      </div>
-  </div>
+
+
+  
 
   <script type="text/javascript" src= "https://code.jquery.com/jquery-3.2.1.min.js"></script>
   <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"></script>
