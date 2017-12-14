@@ -367,33 +367,19 @@ function getHashParams() {
                       return uris;
       }
 
-
-       var actualizarReportes = app.controller("actul" ,function($scope,  nombresCanciones){
-
-            $scope.reporte = nombresCanciones.get();
-                console.log("reportesss ", nombresCanciones.get());
-                $scope.ver = true;
-
-
-        });
-
-
-
-        app.controller("reportes", function($scope,$apply, $http, reportesDatos, nombresCanciones,updateCanciones, reportesDatos, playl){
+        app.controller("reportes", function($scope, $http, reportesDatos, nombresCanciones,updateCanciones, reportesDatos, playl){
 
           $scope.ver= false;
            // $scope.verReportes = function(){
 
-
                 $scope.reporte = nombresCanciones.get();
                 console.log("reportesss ", nombresCanciones.get());
                 $scope.ver = true;
-                $scope.$apply();
 
            // }
 
            $scope.restaura = function(numero){
-                  $route.reload();
+
             var eliminadas = reportesDatos.get();
 
               console.log("elimanodooo ", eliminadas);
@@ -402,7 +388,7 @@ function getHashParams() {
             console.log("hhh ", updateCanciones.get());
             var dataRestaurada = adherirCancion(cancioness,urisUnir);
             var path = playl.get();
-            
+
 
             $http({
                     method: "PUT",
@@ -420,7 +406,7 @@ function getHashParams() {
               }).then(function(response) {
 
           
-                //actualizarReportes();
+
 
                  // toastr.success('Cancion eliminada exitosamente', 'Notificacion');
                                   
